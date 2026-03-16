@@ -1,21 +1,16 @@
 from temporalio import activity
-import requests
 
 @activity.defn
-async def send_email_activity(email: str):
-
-    approval_link = "http://localhost:8000/approve/workflow123"
-    reject_link = "http://localhost:8000/reject/workflow123"
+async def send_email_activity(email: str, workflow_id: str):
+    approval_link = f"http://localhost:8000/approve/{workflow_id}"
+    reject_link = f"http://localhost:8000/reject/{workflow_id}"
 
     print(f"""
-    Email sent to {email}
+Email sent to {email}
 
-    Approve:
-    {approval_link}
-
-    Reject:
-    {reject_link}
-    """)
+Approve: {approval_link}
+Reject: {reject_link}
+""")
 
     # In real world you would send email via SendGrid / SES
 
