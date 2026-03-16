@@ -23,7 +23,7 @@ class ApprovalWorkflow:
         await workflow.execute_activity(
             "send_email_activity",
             email,
-            workflow.info.workflow_id,
+            workflow.info().workflow_id,
             start_to_close_timeout=timedelta(seconds=30),
             retry_policy=RetryPolicy(maximum_attempts=3),
         )

@@ -20,27 +20,44 @@ pip install -r requirements.txt
 if ! pgrep -f "temporal server" >/dev/null 2>&1; then
   echo "Starting Temporal dev server..."
   temporal server start-dev >/tmp/temporal-server.log 2>&1 &
-  sleep 5
-else
-  echo "Temporal server already running."
 fi
 
-# Start worker
+# Wait for Temporal server to be ready
+for i in {1..30}; do
+  if nc -z localhost 7233 >/dev/null 2>&1; then
+    break
+  fi
+  echo "Waiting for Temporal server on 7233... ($i)"
+  sleep 1
+done
+if ! nc -z localhost 7233 >/dev/null 2>&1; then
+  echo "Temporal server failed to start. Check /tmp/temporal-server.log"
+  exit 1
+fi
+
+tmp_worker_log="/tmp/temporal-worker.log"
 if ! pgrep -f "python temporal_approval/worker.py" >/dev/null 2>&1; then
   echo "Starting Temporal worker..."
-  python temporal_approval/worker.py >/tmp/temporal-worker.log 2>&1 &
+  python temporal_approval/worker.py >"$tmp_worker_log" 2>&1 &
   sleep 2
-else
-  echo "Worker already running."
 fi
 
 # Start FastAPI server
 if ! pgrep -f "uvicorn temporal_approval.api" >/dev/null 2>&1; then
   echo "Starting API server..."
   uvicorn temporal_approval.api:app --reload --port 8000 >/tmp/temporal-api.log 2>&1 &
-  sleep 2
-else
-  echo "API server already running."
+fi
+
+for i in {1..30}; do
+  if nc -z localhost 8000 >/dev/null 2>&1; then
+    break
+  fi
+  echo "Waiting for API server on 8000... ($i)"
+  sleep 1
+done
+if ! nc -z localhost 8000 >/dev/null 2>&1; then
+  echo "API server failed to start. Check /tmp/temporal-api.log"
+  exit 1
 fi
 
 # Start workflow runner
