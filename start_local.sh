@@ -47,4 +47,20 @@ fi
 echo "Starting workflow..."
 python temporal_approval/start_workflow.py
 
-echo "Done. API at http://localhost:8000"
+echo
+cat <<'INFO'
+=== Service URLs ===
+Temporal UI: http://localhost:8088
+API docs: http://localhost:8000/docs
+API health: http://localhost:8000
+
+=== Workflow links ===
+(Workflow ID printed by start_workflow.py)
+Approve: http://localhost:8000/approve/<workflow_id>
+Reject: http://localhost:8000/reject/<workflow_id>
+
+=== Log files ===
+Temporal: /tmp/temporal-server.log
+Worker: /tmp/temporal-worker.log
+API: /tmp/temporal-api.log
+INFO
